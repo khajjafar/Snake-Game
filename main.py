@@ -53,16 +53,20 @@ class Snake:
         pygame.display.flip()
 
     def move_left(self):
-        self.direction = 'left'
+        if self.direction != 'right':  # Prevent moving left if currently moving right
+            self.direction = 'left'
 
     def move_right(self):
-        self.direction = 'right'
+        if self.direction != 'left':  # Prevent moving right if currently moving left
+            self.direction = 'right'
 
     def move_up(self):
-        self.direction = 'up'
+        if self.direction != 'down':  # Prevent moving up if currently moving down
+            self.direction = 'up'
 
     def move_down(self):
-        self.direction = 'down'
+        if self.direction != 'up':  # Prevent moving down if currently moving up
+            self.direction = 'down'
 
     def walk(self):
         for i in range(self.length-1, 0, -1):
@@ -83,6 +87,12 @@ class Snake:
 
 class Game:
     def __init__(self, snake_body_image, snake_head_image, cavatappi_image):
+
+        # Store the image paths for use in the reset function
+        self.snake_body_image = snake_body_image
+        self.snake_head_image = snake_head_image
+        self.cavatappi_image = cavatappi_image
+
         pygame.init()
         pygame.mixer.init()
         self.play_background_music()
@@ -93,9 +103,8 @@ class Game:
         self.cavatappi.draw()
 
     def is_collision(self, x1, y1, x2, y2):
-        if x2 <= x1 < x2 + SIZE:
-            if y2 <= y1 < y2 + SIZE:
-                return True
+        if abs(x1 - x2) < SIZE and abs(y1 - y2) < SIZE:
+            return True
         return False
 
     def past_limit(self, x, y):
@@ -156,8 +165,8 @@ class Game:
         pygame.mixer.music.pause()
 
     def reset(self):
-        self.snake = Snake(self.surface, 3)
-        self.cavatappi = Cavatappi(self.surface)
+        self.snake = Snake(self.surface, 3, self.snake_body_image, self.snake_head_image)
+        self.cavatappi = Cavatappi(self.surface, self.cavatappi_image)
 
     def run(self):
         running = True
