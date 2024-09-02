@@ -3,13 +3,16 @@ import pygame
 from pygame.locals import *
 import time
 import random
+import tkinter as tk
+from tkinter import filedialog, messagebox
 
 SIZE = 40
 
 
 class Cavatappi:
-    def __init__(self, parent_screen):
-        self.image = pygame.image.load("resources/cavatappi.jpg").convert()
+    def __init__(self, parent_screen, image_path):
+        self.image = pygame.image.load(image_path).convert()
+        self.image = pygame.transform.scale(self.image, (40, 40))  # Resize to 40x40
         self.parent_screen = parent_screen
         self.x = SIZE*3
         self.y = SIZE*3
@@ -24,10 +27,13 @@ class Cavatappi:
 
 
 class Snake:
-    def __init__(self, parent_screen, length):
+    def __init__(self, parent_screen, length, body_image_path, head_image_path):
         self.length = length
         self.parent_screen = parent_screen
-        self.block = pygame.image.load("resources/block.jpg").convert()
+        self.body_block = pygame.image.load(body_image_path).convert()
+        self.body_block = pygame.transform.scale(self.body_block, (40, 40))  # Resize body to 40x40
+        self.head_block = pygame.image.load(head_image_path).convert()
+        self.head_block = pygame.transform.scale(self.head_block, (40, 40))  # Resize head to 40x40
         self.x = [SIZE]*length
         self.y = [SIZE]*length
         self.direction = 'down'
@@ -38,8 +44,12 @@ class Snake:
         self.y.append(-1)
 
     def draw(self):
-        for i in range(self.length):
-            self.parent_screen.blit(self.block, (self.x[i], self.y[i]))
+        # Draw the head
+        self.parent_screen.blit(self.head_block, (self.x[0], self.y[0]))
+
+        # Draw body
+        for i in range(1, self.length):
+            self.parent_screen.blit(self.body_block, (self.x[i], self.y[i]))
         pygame.display.flip()
 
     def move_left(self):
@@ -72,14 +82,14 @@ class Snake:
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, snake_body_image, snake_head_image, cavatappi_image):
         pygame.init()
         pygame.mixer.init()
         self.play_background_music()
         self.surface = pygame.display.set_mode((1000, 800))
-        self.snake = Snake(self.surface, 3)
+        self.snake = Snake(self.surface, 3, snake_body_image, snake_head_image)
         self.snake.draw()
-        self.cavatappi = Cavatappi(self.surface)
+        self.cavatappi = Cavatappi(self.surface, cavatappi_image)
         self.cavatappi.draw()
 
     def is_collision(self, x1, y1, x2, y2):
@@ -95,7 +105,7 @@ class Game:
 
     def play_background_music(self):
         pygame.mixer.music.load("resources/snake_music.mp3")
-        pygame.mixer.music.set_volume(0.075)
+        pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play()
 
     def play_sound(self, sound):
@@ -132,7 +142,7 @@ class Game:
 
     def display_score(self):
         font = pygame.font.SysFont('arial', 30)
-        score = font.render(f"Score: {self.snake.length}", True, (255, 255, 255))
+        score = font.render(f"Score: {self.snake.length - 3}", True, (255, 255, 255))
         self.surface.blit(score, (800, 10))
 
     def show_game_over(self):
@@ -189,7 +199,31 @@ class Game:
 
             time.sleep(0.1)
 
+def start_game():
+    def select_images():
+        # Initialize tkinter
+        root = tk.Tk()
+        root.withdraw()  # Hide the main window
+
+        # Ask the user if they want to use custom images or default ones
+        use_default = messagebox.askyesno("Use Default Images", "Do you want to use the default blocks?")
+
+        if use_default:
+            # Use default images
+            snake_body_image = "resources/BodyDefault.jpg"
+            snake_head_image = "resources/HeadDefault.jpeg"
+            cavatappi_image = "resources/defaultMouse.jpeg"
+        else:
+            # Let the user select images
+            snake_body_image = filedialog.askopenfilename(title="Select Snake Body Image")
+            snake_head_image = filedialog.askopenfilename(title="Select Snake Head Image")
+            cavatappi_image = filedialog.askopenfilename(title="Select Food Image")
+        return snake_body_image, snake_head_image, cavatappi_image
+
+    snake_body_image, snake_head_image, cavatappi_image = select_images()
+    game = Game(snake_body_image, snake_head_image, cavatappi_image)
+    game.run()
+
 
 if __name__ == '__main__':
-    game = Game()
-    game.run()
+    start_game()
