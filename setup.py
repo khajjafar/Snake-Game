@@ -8,8 +8,8 @@ Usage:
 from setuptools import setup
 
 APP = ['main.py']
-DATA_FILES = ['resources/background.jpeg','resources/block.jpg',
-              'resources/cavatappi.jpg','resources/nomnom.mp3','resources/yummy.mp3',
+DATA_FILES = ['resources/BodyDefault.jpeg','resources/HeadDefault.jpg',
+              'resources/defaultMouse.jpg','resources/nomnom.mp3','resources/yummy.mp3',
               'resources/snake_music.mp3']
 OPTIONS = {}
 
